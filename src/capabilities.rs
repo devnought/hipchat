@@ -185,17 +185,22 @@ pub struct WebHook {
     authentication: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     key: Option<String>,
-    event: Event,
+    event: InternalEvent,
 }
 
 impl WebHook {
-    pub fn new<T>(name: Option<T>, url: T, pattern: Option<T>, event: Event) -> Self
+    pub fn new<T>(name: Option<T>, url: T, event: Event<T>) -> Self
         where T: Into<String>
     {
+        let (event, pattern) = match event {
+            Event::RoomMessage(p) => (InternalEvent::RoomMessage, Some(p.into())),
+            e @ _ => (InternalEvent::from(&e), None),
+        };
+
         Self {
             name: name.map(|x| x.into()),
             url: url.into(),
-            pattern: pattern.map(|x| x.into()),
+            pattern: pattern,
             authentication: None,
             key: None,
             event: event,
@@ -216,9 +221,43 @@ pub enum Scope {
     ViewRoom,
 }
 
+pub enum Event<T>
+    where T: Into<String>
+{
+    RoomArchived,
+    RoomCreated,
+    RoomDeleted,
+    RoomEnter,
+    RoomExit,
+    RoomFileUpload,
+    RoomMessage(T),
+    RoomNotification,
+    RoomTopicChange,
+    RoomUnarchived,
+}
+
+impl<'a, T> From<&'a Event<T>> for InternalEvent
+    where T: Into<String>
+{
+    fn from(event: &'a Event<T>) -> InternalEvent {
+        match *event {
+            Event::RoomArchived => InternalEvent::RoomArchived,
+            Event::RoomCreated => InternalEvent::RoomCreated,
+            Event::RoomDeleted => InternalEvent::RoomDeleted,
+            Event::RoomEnter => InternalEvent::RoomEnter,
+            Event::RoomExit => InternalEvent::RoomExit,
+            Event::RoomFileUpload => InternalEvent::RoomFileUpload,
+            Event::RoomMessage(_) => InternalEvent::RoomMessage,
+            Event::RoomNotification => InternalEvent::RoomNotification,
+            Event::RoomTopicChange => InternalEvent::RoomTopicChange,
+            Event::RoomUnarchived => InternalEvent::RoomUnarchived,
+        }
+    }
+}
+
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "snake_case")]
-pub enum Event {
+enum InternalEvent {
     RoomArchived,
     RoomCreated,
     RoomDeleted,
