@@ -1,3 +1,5 @@
+use Event;
+
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct CapabilitiesDescriptor {
@@ -65,7 +67,7 @@ pub struct Capabilities {
 }
 
 impl Capabilities {
-    pub fn new(api_consumer: Option<HipchatApiConsumer>, webhooks: Vec<WebHook>) -> Self {
+    pub fn new(api_consumer: HipchatApiConsumer, webhooks: Vec<WebHook>) -> Self {
         Self {
             action: None,
             admin_page: None,
@@ -73,7 +75,7 @@ impl Capabilities {
             dialog: None,
             external_page: None,
             glance: None,
-            hipchat_api_consumer: api_consumer,
+            hipchat_api_consumer: Some(api_consumer),
             installable: None,
             oauth2_consumer: None,
             oauth2_provider: None,
@@ -93,15 +95,21 @@ pub struct Links {
 }
 
 impl Links {
-    pub fn new<T, U>(link_self: T, homepage: Option<U>) -> Self
+    pub fn new<T>(link_self: T) -> Self
+        where T: AsRef<str>
+    {
+        Self {
+            homepage: None,
+            link_self: link_self.as_ref().into(),
+        }
+    }
+
+    pub fn with_homepage<T, U>(link_self: T, homepage: U) -> Self
         where T: AsRef<str>,
               U: AsRef<str>
     {
         Self {
-            homepage: match homepage {
-                Some(h) => Some(h.as_ref().into()),
-                None => None,
-            },
+            homepage: Some(homepage.as_ref().into()),
             link_self: link_self.as_ref().into(),
         }
     }
@@ -140,11 +148,21 @@ pub struct HipchatApiConsumer {
 }
 
 impl HipchatApiConsumer {
-    pub fn new<T>(avatar: Option<Avatar>, from_name: T, scopes: Vec<Scope>) -> Self
+    pub fn new<T>(from_name: T, scopes: Vec<Scope>) -> Self
         where T: AsRef<str>
     {
         Self {
-            avatar: avatar,
+            avatar: None,
+            from_name: from_name.as_ref().into(),
+            scopes: scopes,
+        }
+    }
+
+    pub fn with_avatar<T>(avatar: Avatar, from_name: T, scopes: Vec<Scope>) -> Self
+        where T: AsRef<str>
+    {
+        Self {
+            avatar: Some(avatar),
             from_name: from_name.as_ref().into(),
             scopes: scopes,
         }
@@ -160,13 +178,22 @@ pub struct Avatar {
 }
 
 impl Avatar {
-    pub fn new<T, U>(url: T, url2x: Option<U>) -> Self
+    pub fn new<T>(url: T) -> Self
+        where T: AsRef<str>
+    {
+        Self {
+            url: url.as_ref().into(),
+            url2x: None,
+        }
+    }
+
+    pub fn with_2x<T, U>(url: T, url2x: U) -> Self
         where T: AsRef<str>,
               U: AsRef<str>
     {
         Self {
             url: url.as_ref().into(),
-            url2x: url2x.map(|x| x.as_ref().into()),
+            url2x: Some(url2x.as_ref().into()),
         }
     }
 }
@@ -185,8 +212,7 @@ struct WebPanel {}
 
 #[derive(Serialize, Debug)]
 pub struct WebHook {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    name: Option<String>,
+    name: String,
     url: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pattern: Option<String>,
@@ -194,22 +220,22 @@ pub struct WebHook {
     authentication: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     key: Option<String>,
-    event: InternalEvent,
+    event: Event,
 }
 
 impl WebHook {
-    pub fn new<T, U, V>(name: Option<T>, url: U, event: Event<V>) -> Self
+    pub fn new<T, U, V>(name: T, url: U, event: CapabilitiesEvent<V>) -> Self
         where T: AsRef<str>,
               U: AsRef<str>,
               V: AsRef<str>
     {
         let (event, pattern) = match event {
-            Event::RoomMessage(p) => (InternalEvent::RoomMessage, Some(p.as_ref().into())),
-            e @ _ => (InternalEvent::from(&e), None),
+            CapabilitiesEvent::RoomMessage(p) => (Event::RoomMessage, Some(p.as_ref().into())),
+            e @ _ => (Event::from(&e), None),
         };
 
         Self {
-            name: name.map(|x| x.as_ref().into()),
+            name: name.as_ref().into(),
             url: url.as_ref().into(),
             pattern: pattern,
             authentication: None,
@@ -232,7 +258,7 @@ pub enum Scope {
     ViewRoom,
 }
 
-pub enum Event<T>
+pub enum CapabilitiesEvent<T>
     where T: AsRef<str>
 {
     RoomArchived,
@@ -247,36 +273,21 @@ pub enum Event<T>
     RoomUnarchived,
 }
 
-impl<'a, T> From<&'a Event<T>> for InternalEvent
+impl<'a, T> From<&'a CapabilitiesEvent<T>> for Event
     where T: AsRef<str>
 {
-    fn from(event: &'a Event<T>) -> InternalEvent {
+    fn from(event: &'a CapabilitiesEvent<T>) -> Event {
         match *event {
-            Event::RoomArchived => InternalEvent::RoomArchived,
-            Event::RoomCreated => InternalEvent::RoomCreated,
-            Event::RoomDeleted => InternalEvent::RoomDeleted,
-            Event::RoomEnter => InternalEvent::RoomEnter,
-            Event::RoomExit => InternalEvent::RoomExit,
-            Event::RoomFileUpload => InternalEvent::RoomFileUpload,
-            Event::RoomMessage(_) => InternalEvent::RoomMessage,
-            Event::RoomNotification => InternalEvent::RoomNotification,
-            Event::RoomTopicChange => InternalEvent::RoomTopicChange,
-            Event::RoomUnarchived => InternalEvent::RoomUnarchived,
+            CapabilitiesEvent::RoomArchived => Event::RoomArchived,
+            CapabilitiesEvent::RoomCreated => Event::RoomCreated,
+            CapabilitiesEvent::RoomDeleted => Event::RoomDeleted,
+            CapabilitiesEvent::RoomEnter => Event::RoomEnter,
+            CapabilitiesEvent::RoomExit => Event::RoomExit,
+            CapabilitiesEvent::RoomFileUpload => Event::RoomFileUpload,
+            CapabilitiesEvent::RoomMessage(_) => Event::RoomMessage,
+            CapabilitiesEvent::RoomNotification => Event::RoomNotification,
+            CapabilitiesEvent::RoomTopicChange => Event::RoomTopicChange,
+            CapabilitiesEvent::RoomUnarchived => Event::RoomUnarchived,
         }
     }
-}
-
-#[derive(Serialize, Debug)]
-#[serde(rename_all = "snake_case")]
-enum InternalEvent {
-    RoomArchived,
-    RoomCreated,
-    RoomDeleted,
-    RoomEnter,
-    RoomExit,
-    RoomFileUpload,
-    RoomMessage,
-    RoomNotification,
-    RoomTopicChange,
-    RoomUnarchived,
 }

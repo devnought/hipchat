@@ -3,9 +3,12 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 
-mod capabilities;
-pub use capabilities::{Avatar, CapabilitiesDescriptor, Scope, HipchatApiConsumer, WebHook, Event,
-                       Capabilities, Links};
+mod event;
+use event::Event;
+
+pub mod capabilities;
+pub mod request;
+pub mod notification;
 
 #[cfg(test)]
 mod tests {
