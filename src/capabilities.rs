@@ -54,12 +54,11 @@ pub struct Capabilities {
     oauth2_provider: Option<OAuth2Provider>,
     #[serde(skip_serializing_if = "Option::is_none")]
     web_panel: Option<Vec<WebPanel>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    webhook: Option<Vec<WebHook>>,
+    webhook: Vec<WebHook>,
 }
 
 impl Capabilities {
-    pub fn new(api_consumer: Option<HipchatApiConsumer>, webhooks: Option<Vec<WebHook>>) -> Self {
+    pub fn new(api_consumer: Option<HipchatApiConsumer>, webhooks: Vec<WebHook>) -> Self {
         Self {
             action: None,
             admin_page: None,
@@ -126,18 +125,17 @@ struct Glance {}
 pub struct HipchatApiConsumer {
     #[serde(skip_serializing_if = "Option::is_none")]
     avatar: Option<Avatar>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    from_name: Option<String>,
+    from_name: String,
     scopes: Vec<Scope>,
 }
 
 impl HipchatApiConsumer {
-    pub fn new<T>(avatar: Option<Avatar>, from_name: Option<T>, scopes: Vec<Scope>) -> Self
+    pub fn new<T>(avatar: Option<Avatar>, from_name: T, scopes: Vec<Scope>) -> Self
         where T: Into<String>
     {
         Self {
             avatar: avatar,
-            from_name: from_name.map(|x| x.into()),
+            from_name: from_name.into(),
             scopes: scopes,
         }
     }
