@@ -14,16 +14,23 @@ pub struct CapabilitiesDescriptor {
 }
 
 impl CapabilitiesDescriptor {
-    pub fn new<T>(capabilities: Capabilities, description: T, key: T, links: Links, name: T) -> Self
-        where T: Into<String>
+    pub fn new<T, U, V>(capabilities: Capabilities,
+                        description: T,
+                        key: U,
+                        links: Links,
+                        name: V)
+                        -> Self
+        where T: AsRef<str>,
+              U: AsRef<str>,
+              V: AsRef<str>
     {
         Self {
             api_version: None,
             capabilities: Some(capabilities),
-            description: description.into(),
-            key: key.into(),
+            description: description.as_ref().into(),
+            key: key.as_ref().into(),
             links: links,
-            name: name.into(),
+            name: name.as_ref().into(),
             vendor: None,
         }
     }
@@ -86,13 +93,16 @@ pub struct Links {
 }
 
 impl Links {
-    pub fn new<'a, 'b>(homepage: Option<&'a str>, link_self: &'b str) -> Self {
+    pub fn new<T, U>(link_self: T, homepage: Option<U>) -> Self
+        where T: AsRef<str>,
+              U: AsRef<str>
+    {
         Self {
             homepage: match homepage {
-                Some(h) => Some(h.to_string()),
+                Some(h) => Some(h.as_ref().into()),
                 None => None,
             },
-            link_self: link_self.to_string(),
+            link_self: link_self.as_ref().into(),
         }
     }
 }
@@ -131,11 +141,11 @@ pub struct HipchatApiConsumer {
 
 impl HipchatApiConsumer {
     pub fn new<T>(avatar: Option<Avatar>, from_name: T, scopes: Vec<Scope>) -> Self
-        where T: Into<String>
+        where T: AsRef<str>
     {
         Self {
             avatar: avatar,
-            from_name: from_name.into(),
+            from_name: from_name.as_ref().into(),
             scopes: scopes,
         }
     }
@@ -150,12 +160,13 @@ pub struct Avatar {
 }
 
 impl Avatar {
-    pub fn new<T>(url: T, url2x: Option<T>) -> Self
-        where T: Into<String>
+    pub fn new<T, U>(url: T, url2x: Option<U>) -> Self
+        where T: AsRef<str>,
+              U: AsRef<str>
     {
         Self {
-            url: url.into(),
-            url2x: url2x.map(|x| x.into()),
+            url: url.as_ref().into(),
+            url2x: url2x.map(|x| x.as_ref().into()),
         }
     }
 }
@@ -187,17 +198,19 @@ pub struct WebHook {
 }
 
 impl WebHook {
-    pub fn new<T>(name: Option<T>, url: T, event: Event<T>) -> Self
-        where T: Into<String>
+    pub fn new<T, U, V>(name: Option<T>, url: U, event: Event<V>) -> Self
+        where T: AsRef<str>,
+              U: AsRef<str>,
+              V: AsRef<str>
     {
         let (event, pattern) = match event {
-            Event::RoomMessage(p) => (InternalEvent::RoomMessage, Some(p.into())),
+            Event::RoomMessage(p) => (InternalEvent::RoomMessage, Some(p.as_ref().into())),
             e @ _ => (InternalEvent::from(&e), None),
         };
 
         Self {
-            name: name.map(|x| x.into()),
-            url: url.into(),
+            name: name.map(|x| x.as_ref().into()),
+            url: url.as_ref().into(),
             pattern: pattern,
             authentication: None,
             key: None,
@@ -220,7 +233,7 @@ pub enum Scope {
 }
 
 pub enum Event<T>
-    where T: Into<String>
+    where T: AsRef<str>
 {
     RoomArchived,
     RoomCreated,
@@ -235,7 +248,7 @@ pub enum Event<T>
 }
 
 impl<'a, T> From<&'a Event<T>> for InternalEvent
-    where T: Into<String>
+    where T: AsRef<str>
 {
     fn from(event: &'a Event<T>) -> InternalEvent {
         match *event {
