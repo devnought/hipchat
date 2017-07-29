@@ -1,12 +1,12 @@
 #[derive(Serialize, Debug)]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "snake_case")]
 pub enum MessageFormat {
     Html,
     Text,
 }
 
 #[derive(Serialize, Debug)]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "snake_case")]
 pub enum Color {
     Yellow,
     Green,
@@ -17,8 +17,8 @@ pub enum Color {
 }
 
 #[derive(Serialize, Debug)]
-#[serde(rename_all = "lowercase")]
-enum Style {
+#[serde(rename_all = "snake_case")]
+pub enum Style {
     File,
     Image,
     Application,
@@ -27,26 +27,31 @@ enum Style {
 }
 
 #[derive(Serialize, Debug)]
-struct DescriptionObject {
+pub struct Description {
     value: String,
-    format: String,
+    format: MessageFormat,
+}
+
+impl Description {
+    pub fn new<T>(value: T, format: MessageFormat) -> Self
+        where T: AsRef<str>
+    {
+        Self {
+            value: value.as_ref().into(),
+            format: format,
+        }
+    }
 }
 
 #[derive(Serialize, Debug)]
-enum Description {
-    Plain(String),
-    Complex(DescriptionObject),
-}
-
-#[derive(Serialize, Debug)]
-#[serde(rename_all = "lowercase")]
-enum Format {
+#[serde(rename_all = "snake_case")]
+pub enum Format {
     Compact,
     Medium,
 }
 
 #[derive(Serialize, Debug)]
-struct Thumbnail {
+pub struct Thumbnail {
     url: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     url2x: Option<String>,
@@ -54,6 +59,19 @@ struct Thumbnail {
     width: Option<u32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     height: Option<u32>,
+}
+
+impl Thumbnail {
+    pub fn new<T>(url: T) -> Self
+        where T: AsRef<str>
+    {
+        Self {
+            url: url.as_ref().into(),
+            url2x: None,
+            width: None,
+            height: None,
+        }
+    }
 }
 
 #[derive(Serialize, Debug)]
@@ -83,13 +101,7 @@ struct Attribute {
 }
 
 #[derive(Serialize, Debug)]
-enum Icon {
-    Plain(String),
-    Complex(IconObj),
-}
-
-#[derive(Serialize, Debug)]
-struct IconObj {
+struct Icon {
     url: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     url2x: Option<String>,
@@ -115,6 +127,32 @@ pub struct Card {
     icon: Option<Icon>,
 }
 
+impl Card {
+    pub fn new<T, U>(style: Style,
+                     description: Description,
+                     format: Format,
+                     title: T,
+                     thumbnail: Thumbnail,
+                     id: U)
+                     -> Self
+        where T: AsRef<str>,
+              U: AsRef<str>
+    {
+        Self {
+            style: style,
+            description: Some(description),
+            format: format,
+            url: None,
+            title: title.as_ref().into(),
+            thumbnail: Some(thumbnail),
+            activity: None,
+            attributes: None,
+            id: id.as_ref().into(),
+            icon: None,
+        }
+    }
+}
+
 #[derive(Serialize, Debug)]
 pub struct Notification {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -136,7 +174,7 @@ impl<'a> Notification {
     pub fn basic<T>(message: T, color: Color, format: MessageFormat) -> Self
         where T: AsRef<str>
     {
-        Notification {
+        Self {
             from: None,
             message_format: Some(format),
             color: Some(color),
@@ -147,16 +185,14 @@ impl<'a> Notification {
         }
     }
 
-    pub fn with_card<T>(message: T, color: Color, format: MessageFormat, card: Card) -> Self
-        where T: AsRef<str>
-    {
-        Notification {
+    pub fn with_card(color: Color, card: Card, notify: bool) -> Self {
+        Self {
             from: None,
-            message_format: Some(format),
+            message_format: Some(MessageFormat::Text),
             color: Some(color),
             attach_to: None,
-            notify: None,
-            message: message.as_ref().into(),
+            notify: Some(notify),
+            message: card.title.clone(),
             card: Some(card),
         }
     }
