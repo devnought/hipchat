@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "snake_case")]
 pub enum MessageFormat {
@@ -72,13 +74,36 @@ impl Thumbnail {
             height: None,
         }
     }
+
+    pub fn with_2x<T, U>(url: T, url2x: U) -> Self
+        where T: AsRef<str>,
+              U: AsRef<str>
+    {
+        Self {
+            url: url.as_ref().into(),
+            url2x: Some(url2x.as_ref().into()),
+            width: None,
+            height: None,
+        }
+    }
 }
 
 #[derive(Serialize, Debug)]
-struct Activity {
+pub struct Activity {
     html: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     icon: Option<Icon>,
+}
+
+impl Activity {
+    pub fn new<T>(html: T) -> Self
+        where T: AsRef<str>
+    {
+        Activity {
+            html: html.as_ref().into(),
+            icon: None,
+        }
+    }
 }
 
 #[derive(Serialize, Debug)]
@@ -128,19 +153,36 @@ pub struct Card {
 }
 
 impl Card {
-    pub fn new<T, U>(style: Style,
-                     description: Description,
-                     format: Format,
-                     title: T,
-                     thumbnail: Thumbnail,
-                     id: U)
-                     -> Self
+    pub fn new<T, U>(style: Style, format: Format, title: T, id: U, activity: Activity) -> Self
         where T: AsRef<str>,
               U: AsRef<str>
     {
         Self {
             style: style,
-            description: Some(description),
+            description: None,
+            format: format,
+            url: None,
+            title: title.as_ref().into(),
+            thumbnail: None,
+            activity: Some(activity),
+            attributes: None,
+            id: id.as_ref().into(),
+            icon: None,
+        }
+    }
+
+    pub fn with_thumbnail<T, U>(style: Style,
+                                format: Format,
+                                title: T,
+                                id: U,
+                                thumbnail: Thumbnail)
+                                -> Self
+        where T: AsRef<str>,
+              U: AsRef<str>
+    {
+        Self {
+            style: style,
+            description: None,
             format: format,
             url: None,
             title: title.as_ref().into(),
@@ -185,14 +227,16 @@ impl<'a> Notification {
         }
     }
 
-    pub fn with_card(color: Color, card: Card, notify: bool) -> Self {
+    pub fn with_card<T>(message: T, color: Color, format: MessageFormat, card: Card) -> Self
+        where T: AsRef<str>
+    {
         Self {
             from: None,
-            message_format: Some(MessageFormat::Text),
+            message_format: Some(format),
             color: Some(color),
             attach_to: None,
-            notify: Some(notify),
-            message: card.title.clone(),
+            notify: None,
+            message: message.as_ref().into(),
             card: Some(card),
         }
     }

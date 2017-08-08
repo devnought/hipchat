@@ -1,34 +1,37 @@
 use Event;
+use std::borrow::Cow;
 
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct CapabilitiesDescriptor<'a> {
     #[serde(skip_serializing_if = "Option::is_none")]
-    api_version: Option<&'a str>,
+    api_version: Option<Cow<'a, str>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     capabilities: Option<Capabilities<'a>>,
-    description: &'a str,
-    key: &'a str,
+    description: Cow<'a, str>,
+    key: Cow<'a, str>,
     links: Links<'a>,
-    name: &'a str,
+    name: Cow<'a, str>,
     #[serde(skip_serializing_if = "Option::is_none")]
     vendor: Option<Vendor<'a>>,
 }
 
 impl<'a> CapabilitiesDescriptor<'a> {
-    pub fn new(capabilities: Capabilities<'a>,
-               description: &'a str,
-               key: &'a str,
-               links: Links<'a>,
-               name: &'a str)
-               -> Self {
+    pub fn new<T>(capabilities: Capabilities<'a>,
+                  description: T,
+                  key: T,
+                  links: Links<'a>,
+                  name: T)
+                  -> Self
+        where T: Into<Cow<'a, str>>
+    {
         Self {
             api_version: None,
             capabilities: Some(capabilities),
-            description: description,
-            key: key,
+            description: description.into(),
+            key: key.into(),
             links: links,
-            name: name,
+            name: name.into(),
             vendor: None,
         }
     }
@@ -84,32 +87,36 @@ impl<'a> Capabilities<'a> {
 #[derive(Serialize, Debug)]
 pub struct Links<'a> {
     #[serde(skip_serializing_if = "Option::is_none")]
-    homepage: Option<&'a str>,
+    homepage: Option<Cow<'a, str>>,
 
     #[serde(rename = "self")]
-    link_self: &'a str,
+    link_self: Cow<'a, str>,
 }
 
 impl<'a> Links<'a> {
-    pub fn new(link_self: &'a str) -> Self {
+    pub fn new<T>(link_self: T) -> Self
+        where T: Into<Cow<'a, str>>
+    {
         Self {
             homepage: None,
-            link_self: link_self,
+            link_self: link_self.into(),
         }
     }
 
-    pub fn with_homepage(link_self: &'a str, homepage: &'a str) -> Self {
+    pub fn with_homepage<T>(link_self: T, homepage: T) -> Self
+        where T: Into<Cow<'a, str>>
+    {
         Self {
-            homepage: Some(homepage),
-            link_self: link_self,
+            homepage: Some(homepage.into()),
+            link_self: link_self.into(),
         }
     }
 }
 
 #[derive(Serialize, Debug)]
 struct Vendor<'a> {
-    name: &'a str,
-    url: &'a str,
+    name: Cow<'a, str>,
+    url: Cow<'a, str>,
 }
 
 #[derive(Serialize, Debug)]
@@ -134,23 +141,27 @@ struct Glance {}
 pub struct HipchatApiConsumer<'a> {
     #[serde(skip_serializing_if = "Option::is_none")]
     avatar: Option<Avatar<'a>>,
-    from_name: &'a str,
+    from_name: Cow<'a, str>,
     scopes: &'a [Scope],
 }
 
 impl<'a> HipchatApiConsumer<'a> {
-    pub fn new(from_name: &'a str, scopes: &'a [Scope]) -> Self {
+    pub fn new<T>(from_name: T, scopes: &'a [Scope]) -> Self
+        where T: Into<Cow<'a, str>>
+    {
         Self {
             avatar: None,
-            from_name: from_name,
+            from_name: from_name.into(),
             scopes: scopes,
         }
     }
 
-    pub fn with_avatar(avatar: Avatar<'a>, from_name: &'a str, scopes: &'a [Scope]) -> Self {
+    pub fn with_avatar<T>(avatar: Avatar<'a>, from_name: T, scopes: &'a [Scope]) -> Self
+        where T: Into<Cow<'a, str>>
+    {
         Self {
             avatar: Some(avatar),
-            from_name: from_name,
+            from_name: from_name.into(),
             scopes: scopes,
         }
     }
@@ -158,24 +169,28 @@ impl<'a> HipchatApiConsumer<'a> {
 
 #[derive(Serialize, Debug)]
 pub struct Avatar<'a> {
-    url: &'a str,
+    url: Cow<'a, str>,
 
     #[serde(rename = "url@2x", skip_serializing_if = "Option::is_none")]
-    url2x: Option<&'a str>,
+    url2x: Option<Cow<'a, str>>,
 }
 
 impl<'a> Avatar<'a> {
-    pub fn new(url: &'a str) -> Self {
+    pub fn new<T>(url: T) -> Self
+        where T: Into<Cow<'a, str>>
+    {
         Self {
-            url: url,
+            url: url.into(),
             url2x: None,
         }
     }
 
-    pub fn with_2x(url: &'a str, url2x: &'a str) -> Self {
+    pub fn with_2x<T>(url: T, url2x: T) -> Self
+        where T: Into<Cow<'a, str>>
+    {
         Self {
-            url: url,
-            url2x: Some(url2x),
+            url: url.into(),
+            url2x: Some(url2x.into()),
         }
     }
 }
@@ -194,27 +209,39 @@ struct WebPanel {}
 
 #[derive(Serialize, Debug)]
 pub struct WebHook<'a> {
-    name: &'a str,
-    url: &'a str,
+    name: Cow<'a, str>,
+    url: Cow<'a, str>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pattern: Option<&'a str>,
+    pattern: Option<Cow<'a, str>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    authentication: Option<&'a str>,
+    authentication: Option<Cow<'a, str>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    key: Option<&'a str>,
+    key: Option<Cow<'a, str>>,
     event: Event,
 }
 
 impl<'a> WebHook<'a> {
-    pub fn new(name: &'a str, url: &'a str, event: CapabilitiesEvent<&'a str>) -> Self {
+    pub fn new<T, U, V>(name: T, url: U, event: CapabilitiesEvent<V>) -> Self
+        where T: Into<Cow<'a, str>>,
+              U: Into<Cow<'a, str>>,
+              V: Into<Cow<'a, str>>
+    {
         let (event, pattern) = match event {
-            CapabilitiesEvent::RoomMessage(p) => (Event::RoomMessage, Some(p)),
-            e @ _ => (Event::from(&e), None),
+            CapabilitiesEvent::RoomArchived => (Event::RoomArchived, None),
+            CapabilitiesEvent::RoomCreated => (Event::RoomCreated, None),
+            CapabilitiesEvent::RoomDeleted => (Event::RoomDeleted, None),
+            CapabilitiesEvent::RoomEnter => (Event::RoomEnter, None),
+            CapabilitiesEvent::RoomExit => (Event::RoomExit, None),
+            CapabilitiesEvent::RoomFileUpload => (Event::RoomFileUpload, None),
+            CapabilitiesEvent::RoomMessage(p) => (Event::RoomMessage, Some(p.into())),
+            CapabilitiesEvent::RoomNotification => (Event::RoomNotification, None),
+            CapabilitiesEvent::RoomTopicChange => (Event::RoomTopicChange, None),
+            CapabilitiesEvent::RoomUnarchived => (Event::RoomUnarchived, None),
         };
 
         Self {
-            name: name,
-            url: url,
+            name: name.into(),
+            url: url.into(),
             pattern: pattern,
             authentication: None,
             key: None,
@@ -237,7 +264,6 @@ pub enum Scope {
 }
 
 pub enum CapabilitiesEvent<T>
-    where T: AsRef<str>
 {
     RoomArchived,
     RoomCreated,
@@ -249,23 +275,4 @@ pub enum CapabilitiesEvent<T>
     RoomNotification,
     RoomTopicChange,
     RoomUnarchived,
-}
-
-impl<'a, T> From<&'a CapabilitiesEvent<T>> for Event
-    where T: AsRef<str>
-{
-    fn from(event: &'a CapabilitiesEvent<T>) -> Event {
-        match *event {
-            CapabilitiesEvent::RoomArchived => Event::RoomArchived,
-            CapabilitiesEvent::RoomCreated => Event::RoomCreated,
-            CapabilitiesEvent::RoomDeleted => Event::RoomDeleted,
-            CapabilitiesEvent::RoomEnter => Event::RoomEnter,
-            CapabilitiesEvent::RoomExit => Event::RoomExit,
-            CapabilitiesEvent::RoomFileUpload => Event::RoomFileUpload,
-            CapabilitiesEvent::RoomMessage(_) => Event::RoomMessage,
-            CapabilitiesEvent::RoomNotification => Event::RoomNotification,
-            CapabilitiesEvent::RoomTopicChange => Event::RoomTopicChange,
-            CapabilitiesEvent::RoomUnarchived => Event::RoomUnarchived,
-        }
-    }
 }
