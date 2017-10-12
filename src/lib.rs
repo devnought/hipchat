@@ -9,6 +9,7 @@ use event::Event;
 pub mod capabilities;
 pub mod request;
 pub mod notification;
+pub mod user;
 
 #[cfg(test)]
 mod tests {

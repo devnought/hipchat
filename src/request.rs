@@ -1,130 +1,130 @@
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "snake_case", tag = "event")]
-pub enum HipchatRequest<'a> {
+pub enum HipchatRequest {
     RoomEnter {
-        item: RoomEnterItem<'a>,
-        oauth_client_id: Option<&'a str>,
+        item: RoomEnterItem,
+        oauth_client_id: Option<String>,
         webhook_id: usize,
     },
     RoomExit {
-        item: RoomExitItem<'a>,
-        oauth_client_id: Option<&'a str>,
+        item: RoomExitItem,
+        oauth_client_id: Option<String>,
         webhook_id: usize,
     },
     RoomMessage {
-        item: RoomMessageItem<'a>,
-        oauth_client_id: Option<&'a str>,
+        item: RoomMessageItem,
+        oauth_client_id: Option<String>,
         webhook_id: usize,
     },
 }
 
 #[derive(Debug, Deserialize)]
-pub struct RoomEnterItem<'a> {
-    room: Room<'a>,
-    sender: Sender<'a>,
+pub struct RoomEnterItem {
+    room: Room,
+    sender: Sender,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct RoomExitItem<'a> {
-    room: Room<'a>,
-    sender: Sender<'a>,
+pub struct RoomExitItem {
+    room: Room,
+    sender: Sender,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct RoomMessageItem<'a> {
-    message: Message<'a>,
-    room: Room<'a>,
+pub struct RoomMessageItem {
+    message: Message,
+    room: Room,
 }
 
-impl<'a> RoomMessageItem<'a> {
+impl RoomMessageItem {
     pub fn message(&self) -> &str {
         &self.message.message
     }
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Message<'a> {
-    date: &'a str,
-    file: Option<MessageFile<'a>>,
-    from: Sender<'a>,
-    id: &'a str,
-    mentions: Option<&'a [Sender<'a>]>,
-    message: &'a str,
-    message_links: Option<&'a [MessageLink<'a>]>,
+pub struct Message {
+    date: String,
+    file: Option<MessageFile>,
+    from: Sender,
+    id: String,
+    mentions: Option<Vec<Sender>>,
+    message: String,
+    message_links: Option<Vec<MessageLink>>,
     #[serde(rename = "type")]
     message_type: MessageType,
 }
 
 #[derive(Debug, Deserialize)]
-struct MessageFile<'a> {
-    name: &'a str,
+struct MessageFile {
+    name: String,
     size: u32,
-    thumb_url: Option<&'a str>,
-    url: &'a str,
+    thumb_url: Option<String>,
+    url: String,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Sender<'a> {
+pub struct Sender {
     id: usize,
-    links: Links<'a>,
-    mention_name: &'a str,
-    name: &'a str,
-    version: &'a str,
+    links: Links,
+    mention_name: String,
+    name: String,
+    version: String,
 }
 
 #[derive(Debug, Deserialize)]
-struct Links<'a> {
+struct Links {
     #[serde(rename = "self")]
-    link_self: &'a str,
+    link_self: String,
 }
 
 #[derive(Debug, Deserialize)]
-struct MessageLink<'a> {
-    image: Option<MessageLinkImage<'a>>,
-    link: Option<MessageLinkLink<'a>>,
-    twitter_status: Option<MessageLinkTwitterStatus<'a>>,
-    twitter_user: Option<MessageLinkTwitterUser<'a>>,
+struct MessageLink {
+    image: Option<MessageLinkImage>,
+    link: Option<MessageLinkLink>,
+    twitter_status: Option<MessageLinkTwitterStatus>,
+    twitter_user: Option<MessageLinkTwitterUser>,
     #[serde(rename = "type")]
     message_type: MessageLinkType,
-    url: &'a str,
-    video: Option<MessageLinkVideo<'a>>,
+    url: String,
+    video: Option<MessageLinkVideo>,
 }
 
 #[derive(Debug, Deserialize)]
-struct MessageLinkImage<'a> {
-    image: Option<&'a str>,
-    name: Option<&'a str>,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct MessageLinkLink<'a> {
-    description: Option<&'a str>,
-    favicon_url: Option<&'a str>,
-    full_url: Option<&'a str>,
-    header_text: Option<&'a str>,
-    link_text: Option<&'a str>,
-    title: Option<&'a str>,
+struct MessageLinkImage {
+    image: Option<String>,
+    name: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct MessageLinkTwitterStatus<'a> {
-    created: Option<&'a str>,
-    name: Option<&'a str>,
-    profile_image_url: Option<&'a str>,
-    screen_name: Option<&'a str>,
-    source: Option<&'a str>,
-    text: &'a str,
+struct MessageLinkLink {
+    description: Option<String>,
+    favicon_url: Option<String>,
+    full_url: Option<String>,
+    header_text: Option<String>,
+    link_text: Option<String>,
+    title: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct MessageLinkTwitterUser<'a> {
+struct MessageLinkTwitterStatus {
+    created: Option<String>,
+    name: Option<String>,
+    profile_image_url: Option<String>,
+    screen_name: Option<String>,
+    source: Option<String>,
+    text: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct MessageLinkTwitterUser {
     followers: u32,
-    name: &'a str,
-    profile_image_url: &'a str,
-    screen_name: &'a str,
+    name: String,
+    profile_image_url: String,
+    screen_name: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -139,10 +139,10 @@ enum MessageLinkType {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct MessageLinkVideo<'a> {
-    author: Option<&'a str>,
-    thumbnail_url: Option<&'a str>,
-    title: Option<&'a str>,
+struct MessageLinkVideo {
+    author: Option<String>,
+    thumbnail_url: Option<String>,
+    title: Option<String>,
     views: Option<usize>,
 }
 
@@ -156,20 +156,20 @@ enum MessageType {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Room<'a> {
+pub struct Room {
     id: usize,
     is_archived: bool,
-    links: RoomLinks<'a>,
-    name: &'a str,
-    privacy: &'a str,
-    version: &'a str,
+    links: RoomLinks,
+    name: String,
+    privacy: String,
+    version: String,
 }
 
 #[derive(Debug, Deserialize)]
-struct RoomLinks<'a> {
-    members: Option<&'a str>,
-    participants: &'a str,
+struct RoomLinks {
+    members: Option<String>,
+    participants: String,
     #[serde(rename = "self")]
-    link_self: &'a str,
-    webhooks: &'a str,
+    link_self: String,
+    webhooks: String,
 }
