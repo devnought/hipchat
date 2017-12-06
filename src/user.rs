@@ -19,5 +19,11 @@ pub enum UserRequest<'a> {
         password: Option<Cow<'a, str>>,
         email: Cow<'a, str>,
     },
+    Invite {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        title: Option<Cow<'a, str>>,
+        email: Cow<'a, str>,
+        name: Cow<'a, str>,
+    },
     Delete { id_or_email: Cow<'a, str> },
 }
