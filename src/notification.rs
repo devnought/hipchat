@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "snake_case")]
 pub enum MessageFormat {
@@ -36,7 +34,8 @@ pub struct Description {
 
 impl Description {
     pub fn new<T>(value: T, format: MessageFormat) -> Self
-        where T: AsRef<str>
+    where
+        T: AsRef<str>,
     {
         Self {
             value: value.as_ref().into(),
@@ -65,7 +64,8 @@ pub struct Thumbnail {
 
 impl Thumbnail {
     pub fn new<T>(url: T) -> Self
-        where T: AsRef<str>
+    where
+        T: AsRef<str>,
     {
         Self {
             url: url.as_ref().into(),
@@ -76,8 +76,9 @@ impl Thumbnail {
     }
 
     pub fn with_2x<T, U>(url: T, url2x: U) -> Self
-        where T: AsRef<str>,
-              U: AsRef<str>
+    where
+        T: AsRef<str>,
+        U: AsRef<str>,
     {
         Self {
             url: url.as_ref().into(),
@@ -97,7 +98,8 @@ pub struct Activity {
 
 impl Activity {
     pub fn new<T>(html: T) -> Self
-        where T: AsRef<str>
+    where
+        T: AsRef<str>,
     {
         Activity {
             html: html.as_ref().into(),
@@ -154,8 +156,9 @@ pub struct Card {
 
 impl Card {
     pub fn new<T, U>(style: Style, format: Format, title: T, id: U, activity: Activity) -> Self
-        where T: AsRef<str>,
-              U: AsRef<str>
+    where
+        T: AsRef<str>,
+        U: AsRef<str>,
     {
         Self {
             style: style,
@@ -171,14 +174,16 @@ impl Card {
         }
     }
 
-    pub fn with_thumbnail<T, U>(style: Style,
-                                format: Format,
-                                title: T,
-                                id: U,
-                                thumbnail: Thumbnail)
-                                -> Self
-        where T: AsRef<str>,
-              U: AsRef<str>
+    pub fn with_thumbnail<T, U>(
+        style: Style,
+        format: Format,
+        title: T,
+        id: U,
+        thumbnail: Thumbnail,
+    ) -> Self
+    where
+        T: AsRef<str>,
+        U: AsRef<str>,
     {
         Self {
             style: style,
@@ -214,7 +219,8 @@ pub struct Notification {
 
 impl<'a> Notification {
     pub fn basic<T>(message: T, color: Color, format: MessageFormat) -> Self
-        where T: AsRef<str>
+    where
+        T: AsRef<str>,
     {
         Self {
             from: None,
@@ -228,7 +234,8 @@ impl<'a> Notification {
     }
 
     pub fn with_card<T>(message: T, color: Color, format: MessageFormat, card: Card) -> Self
-        where T: AsRef<str>
+    where
+        T: AsRef<str>,
     {
         Self {
             from: None,

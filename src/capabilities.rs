@@ -1,5 +1,5 @@
-use Event;
 use std::borrow::Cow;
+use Event;
 
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -17,13 +17,15 @@ pub struct CapabilitiesDescriptor<'a> {
 }
 
 impl<'a> CapabilitiesDescriptor<'a> {
-    pub fn new<T>(capabilities: Capabilities<'a>,
-                  description: T,
-                  key: T,
-                  links: Links<'a>,
-                  name: T)
-                  -> Self
-        where T: Into<Cow<'a, str>>
+    pub fn new<T>(
+        capabilities: Capabilities<'a>,
+        description: T,
+        key: T,
+        links: Links<'a>,
+        name: T,
+    ) -> Self
+    where
+        T: Into<Cow<'a, str>>,
     {
         Self {
             api_version: None,
@@ -41,17 +43,17 @@ impl<'a> CapabilitiesDescriptor<'a> {
 #[serde(rename_all = "camelCase")]
 pub struct Capabilities<'a> {
     #[serde(skip_serializing_if = "Option::is_none")]
-    action: Option<&'a [Action]>,
+    action: Option<Vec<Action>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     admin_page: Option<AdminPage>,
     #[serde(skip_serializing_if = "Option::is_none")]
     configurable: Option<Configurable>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    dialog: Option<&'a [Dialog]>,
+    dialog: Option<Vec<Dialog>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    external_page: Option<&'a [ExternalPage]>,
+    external_page: Option<Vec<ExternalPage>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    glance: Option<&'a [Glance]>,
+    glance: Option<Vec<Glance>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     hipchat_api_consumer: Option<HipchatApiConsumer<'a>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -61,12 +63,12 @@ pub struct Capabilities<'a> {
     #[serde(skip_serializing_if = "Option::is_none")]
     oauth2_provider: Option<OAuth2Provider>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    web_panel: Option<&'a [WebPanel]>,
-    webhook: &'a [WebHook<'a>],
+    web_panel: Option<Vec<WebPanel>>,
+    webhook: Vec<WebHook<'a>>,
 }
 
 impl<'a> Capabilities<'a> {
-    pub fn new(api_consumer: HipchatApiConsumer<'a>, webhooks: &'a [WebHook<'a>]) -> Self {
+    pub fn new(api_consumer: HipchatApiConsumer<'a>, webhooks: Vec<WebHook<'a>>) -> Self {
         Self {
             action: None,
             admin_page: None,
@@ -95,7 +97,8 @@ pub struct Links<'a> {
 
 impl<'a> Links<'a> {
     pub fn new<T>(link_self: T) -> Self
-        where T: Into<Cow<'a, str>>
+    where
+        T: Into<Cow<'a, str>>,
     {
         Self {
             homepage: None,
@@ -104,7 +107,8 @@ impl<'a> Links<'a> {
     }
 
     pub fn with_homepage<T>(link_self: T, homepage: T) -> Self
-        where T: Into<Cow<'a, str>>
+    where
+        T: Into<Cow<'a, str>>,
     {
         Self {
             homepage: Some(homepage.into()),
@@ -142,27 +146,29 @@ pub struct HipchatApiConsumer<'a> {
     #[serde(skip_serializing_if = "Option::is_none")]
     avatar: Option<Avatar<'a>>,
     from_name: Cow<'a, str>,
-    scopes: &'a [Scope],
+    scopes: Vec<Scope>,
 }
 
 impl<'a> HipchatApiConsumer<'a> {
-    pub fn new<T>(from_name: T, scopes: &'a [Scope]) -> Self
-        where T: Into<Cow<'a, str>>
+    pub fn new<T>(from_name: T, scopes: Vec<Scope>) -> Self
+    where
+        T: Into<Cow<'a, str>>,
     {
         Self {
             avatar: None,
             from_name: from_name.into(),
-            scopes: scopes,
+            scopes,
         }
     }
 
-    pub fn with_avatar<T>(avatar: Avatar<'a>, from_name: T, scopes: &'a [Scope]) -> Self
-        where T: Into<Cow<'a, str>>
+    pub fn with_avatar<T>(avatar: Avatar<'a>, from_name: T, scopes: Vec<Scope>) -> Self
+    where
+        T: Into<Cow<'a, str>>,
     {
         Self {
             avatar: Some(avatar),
             from_name: from_name.into(),
-            scopes: scopes,
+            scopes,
         }
     }
 }
@@ -177,7 +183,8 @@ pub struct Avatar<'a> {
 
 impl<'a> Avatar<'a> {
     pub fn new<T>(url: T) -> Self
-        where T: Into<Cow<'a, str>>
+    where
+        T: Into<Cow<'a, str>>,
     {
         Self {
             url: url.into(),
@@ -186,7 +193,8 @@ impl<'a> Avatar<'a> {
     }
 
     pub fn with_2x<T>(url: T, url2x: T) -> Self
-        where T: Into<Cow<'a, str>>
+    where
+        T: Into<Cow<'a, str>>,
     {
         Self {
             url: url.into(),
@@ -222,9 +230,10 @@ pub struct WebHook<'a> {
 
 impl<'a> WebHook<'a> {
     pub fn new<T, U, V>(name: T, url: U, event: CapabilitiesEvent<V>) -> Self
-        where T: Into<Cow<'a, str>>,
-              U: Into<Cow<'a, str>>,
-              V: Into<Cow<'a, str>>
+    where
+        T: Into<Cow<'a, str>>,
+        U: Into<Cow<'a, str>>,
+        V: Into<Cow<'a, str>>,
     {
         let (event, pattern) = match event {
             CapabilitiesEvent::RoomArchived => (Event::RoomArchived, None),
@@ -263,8 +272,7 @@ pub enum Scope {
     ViewRoom,
 }
 
-pub enum CapabilitiesEvent<T>
-{
+pub enum CapabilitiesEvent<T> {
     RoomArchived,
     RoomCreated,
     RoomDeleted,

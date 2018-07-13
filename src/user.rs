@@ -25,7 +25,9 @@ pub enum UserRequest<'a> {
         email: Cow<'a, str>,
         name: Cow<'a, str>,
     },
-    Delete { id_or_email: Cow<'a, str> },
+    Delete {
+        id_or_email: Cow<'a, str>,
+    },
 }
 
 #[derive(Debug, Deserialize)]
@@ -49,7 +51,9 @@ pub enum UserResponse<'a> {
         email: Option<Cow<'a, str>>,
         photo_url: Option<Cow<'a, str>>,
     },
-    Error { error: UserError<'a> },
+    Error {
+        error: UserError<'a>,
+    },
 }
 
 #[derive(Debug, Deserialize)]
