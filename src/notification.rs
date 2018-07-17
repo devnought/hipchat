@@ -120,7 +120,7 @@ enum AttributeStyle {
 }
 
 #[derive(Serialize, Debug)]
-struct Attribute {
+pub struct Attribute {
     #[serde(skip_serializing_if = "Option::is_none")]
     url: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -128,7 +128,7 @@ struct Attribute {
 }
 
 #[derive(Serialize, Debug)]
-struct Icon {
+pub struct Icon {
     url: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     url2x: Option<String>,
@@ -136,22 +136,22 @@ struct Icon {
 
 #[derive(Serialize, Debug)]
 pub struct Card {
-    style: Style,
+    pub style: Style,
     #[serde(skip_serializing_if = "Option::is_none")]
-    description: Option<Description>,
-    format: Format,
+    pub description: Option<Description>,
+    pub format: Format,
     #[serde(skip_serializing_if = "Option::is_none")]
-    url: Option<String>,
-    title: String,
+    pub url: Option<String>,
+    pub title: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    thumbnail: Option<Thumbnail>,
+    pub thumbnail: Option<Thumbnail>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    activity: Option<Activity>,
+    pub activity: Option<Activity>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    attributes: Option<Vec<Attribute>>,
-    id: String,
+    pub attributes: Option<Vec<Attribute>>,
+    pub id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    icon: Option<Icon>,
+    pub icon: Option<Icon>,
 }
 
 impl Card {
@@ -203,18 +203,18 @@ impl Card {
 #[derive(Serialize, Debug)]
 pub struct Notification {
     #[serde(skip_serializing_if = "Option::is_none")]
-    from: Option<String>,
+    pub from: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    message_format: Option<MessageFormat>,
+    pub message_format: Option<MessageFormat>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    color: Option<Color>,
+    pub color: Option<Color>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    attach_to: Option<String>,
+    pub attach_to: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    notify: Option<bool>,
-    message: String,
+    pub notify: Option<bool>,
+    pub message: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    card: Option<Card>,
+    pub card: Option<Card>,
 }
 
 impl<'a> Notification {
