@@ -1,3 +1,4 @@
+use serde_derive::Serialize;
 use std::borrow::Cow;
 use Event;
 

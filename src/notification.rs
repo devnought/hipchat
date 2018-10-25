@@ -1,3 +1,5 @@
+use serde_derive::Serialize;
+
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "snake_case")]
 pub enum MessageFormat {
